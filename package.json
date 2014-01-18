@@ -1,0 +1,24 @@
+{
+  "name": "promises-and-generators",
+  "version": "0.0.2",
+  "private": true,
+  "description": "A presentation about JavaScript promises and generators",
+  "dependencies": {
+    "transform": "~1.1.0",
+    "jade": "~0.35.0",
+    "express": "~3.3.6",
+    "highlight.js": "~8.0.0"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "stop": "*",
+    "rimraf": "*",
+    "mandate": "*"
+  },
+  "scripts": {
+    "prerelease": "rimraf out",
+    "release": "stop && mandate",
+    "postrelease": "rimraf out",
+    "test": "mocha -R spec"
+  }
+}

@@ -1,0 +1,254 @@
+section
+  h1 Patterns of Promise Use
+  p Forbes Lindesay
+
+section.section-break
+  h2 Introduction
+section
+  h2 What is a promise?
+  ul
+    li.fragment The result of an asynchronous operation
+    li.fragment It can be in one of three states
+      ul
+        li.fragment Pending
+        li.fragment Fulfilled
+        li.fragment Rejected
+section
+  h2 Why not just callbacks?
+  ul.icons-ul
+    +good.fragment Avoid conflating the input with the output
+    +good.fragment Composability with less chance of race conditions
+    +good.fragment Implicit error handling
+section
+  h2 Creating a Promise
+  :javascript
+    function readFile(filename, encoding) {
+      return new Promise(function (fulfill, reject) {
+        return fs.readFile(filename, encoding, function (err, res) {
+          if (err) reject(err);
+          else fulfill(res);
+        });
+      });
+    }
+section
+  h2 Getting the value of a Promise
+  :javascript
+    readFile('file.json', 'utf8').done(function (str) {
+      console.log(str);
+    }, function (err) {
+      console.log('Error reading file:');
+      throw err;
+    });
+section
+  h2 Chaining asynchronous operations
+  :javascript
+    var promiseForObj = readFile('file.json', 'utf8').then(JSON.parse);
+    
+    promiseForObj.done(function (obj) {
+      console.log(obj);
+    }, function (err) {
+      console.log('Error reading file:');
+      throw err;
+    });
+
+section.section-break
+  h2 Async.js - Waterfall
+section
+  h2 Waterfall
+  :javascript
+    function checkAccess(userID, resource, callback) {
+      async.waterfall([
+        function(callback){
+          getUser(userID, callback);
+        },
+        function(user, callback){
+            user.getPermissions(callback);
+        },
+        function(userPermissions, callback){
+            userPermissions.checkAccess(resource, callback);
+        }
+      ], callback);
+    }
+section
+  h2 Waterfall
+  :javascript
+    function checkAccess(userID, resource) {
+      var user = getUser(userID);
+      var userPermissions = user.getPermissions();
+      return userPermissions.checkAccess(resource);
+    }
+section
+  h2 Waterfall
+  :javascript
+    function checkAccess(userID, resource) {
+      return getUser(userID).then(function (user) {
+        return user.getPermissions();
+      }).then(function (userPermissions) {
+        return userPermissions.checkAccess(resource);
+      });
+    }
+section.section-break
+  h2 Throttling
+section
+  h2 One at a Time
+  :javascript
+    function oneAtATime(fn) {
+      var ready = Promise.from(null);
+      return function () {
+        var args = arguments;
+        var result = ready.then(function () {
+          return fn.apply(null, args);
+        });
+        ready = result.then(null, function () {});
+        return result;
+      };
+    }
+section
+  h2 Limit
+  div(style="font-size: 0.6em;")
+    :javascript
+      function throttle(limit, fn) {
+        var queue = [];
+        function run(fn, self, args) {
+          if (limit) {
+            limit--;
+            var result = fn.apply(self, args);
+            result.done(release, release);
+            return result;
+          } else {
+            return new Promise(function (fulfill) {
+              queue.push({fulfill: fulfill, fn: fn, self: self, args: args})
+            })
+          }
+        }
+        function release() {
+          limit++;
+          if (queue.length) {
+            var next = queue.shift();
+            next.fulfill(run(next.fn, next.self, next.args));
+          }
+        }
+        return function () {
+          return run(fn, this, arguments);
+        }
+      }
+section
+  h2 Throat
+  :javascript
+    var throttle = require('throat');
+    var throttled = throttle(4, fn);
+    //now throttled calls fn only 4 times in parallel
+    for (var i = 0; i < 1000; i++) {
+      fn(i);
+    }
+
+section.section-break
+  h2 Async.js - Map
+section
+  h2 Array.prototype.map
+  :javascript
+    var numbers = [1, 2, 3, 4];
+    var doubled = numbers.map(function double(n) {
+      return n * 2;
+    });
+    // doubled => [2, 4, 6, 8]
+section
+  h2 Async.map
+  :javascript
+    var numbers = [1, 2, 3, 4];
+    async.map(numbers, function slowDouble(n, callback) {
+      setTimeout(function () {
+        callback(null, n * 2);
+      }, 10000);
+    }, function (err, doubled) {
+      // doubled => [2, 4, 6, 8]
+    });
+section
+  h2 Map Promises
+  :javascript
+    function slowDouble(n) {
+      return new Promise(function (fulfill) {
+        setTimeout(function () {
+          fulfill(n * 2);
+        }, 10000);
+      });
+    }
+section
+  h2 Map Promises
+  :javascript
+    var numbers = [1, 2, 3, 4];
+    var promises = numbers.map(slowDouble);
+    // promises => [Promise(2), Promise(4), Promise(6), Promise(8)]
+section
+  h2 Map Promises
+  :javascript
+    var numbers = [1, 2, 3, 4];
+    var promises = numbers.map(slowDouble);
+    // promises => [Promise(2), Promise(4), Promise(6), Promise(8)]
+    var doubled = promises.reduce(function (accumulator, promise) {
+      return accumulator.then(function (accumulator) {
+        return promise.then(function (value) {
+          accumulator.push(value);
+          return accumulator;
+        });
+    }, Promise.from([]));
+    // doubled => Promise([2, 4, 6, 8])
+section
+  h2 Promise.all
+  :javascript
+    Promise.all = function (promises) {
+      return promises.reduce(function (accumulator, promise) {
+        return accumulator.then(function (accumulator) {
+          return promise.then(function (value) {
+            accumulator.push(value);
+            return accumulator;
+          });
+      }, Promise.from([]));
+    };
+section
+  h2 Map using Promise.all
+  :javascript
+    var numbers = [1, 2, 3, 4];
+    var doubled = Promise.all(numbers.map(slowDouble));
+    // doubled => Promise([2, 4, 6, 8])
+section
+  h2 mapSerial / mapLimit
+  :javascript
+    var numbers = [1, 2, 3, 4];
+    async.mapSerial(numbers, function slowDouble(n, callback) {
+      setTimeout(function () {
+        callback(null, n * 2);
+      }, 10000);
+    }, function (err, doubled) {
+      // doubled => [2, 4, 6, 8]
+    });
+    async.mapLimit(numbers, 2, function slowDouble(n, callback) {
+      setTimeout(function () {
+        callback(null, n * 2);
+      }, 10000);
+    }, function (err, doubled) {
+      // doubled => [2, 4, 6, 8]
+    });
+section
+  h2 mapSerial / mapLimit
+  :javascript
+    var throat = require('throat');
+    var numbers = [1, 2, 3, 4];
+    var doubledSer = Promise.all(numbers.map(throat(1, slowDouble)));
+    var doubledLim = Promise.all(numbers.map(throat(2, slowDouble)));
+section
+  h2 Forbes Lindesay
+  h4 Social Networks
+  ul
+    li Twitter: @ForbesLindesay
+    li GitHub: @ForbesLindesay
+    li Blog: www.forbeslindesay.co.uk
+  h4 Open Source
+  ul
+    li Jade
+    li Browserify Middleware
+    li esdiscuss.org
+    li regexplained.co.uk
+  h4 Work
+  ul
+    li Red Gate

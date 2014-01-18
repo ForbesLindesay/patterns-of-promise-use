@@ -1,0 +1,83 @@
+doctype html
+mixin bad()
+  li(attributes)
+    i.icon-remove
+    block
+mixin good()
+  li(attributes)
+    i.icon-ok
+    block
+html
+  head
+    meta(charset='utf-8')
+    title Patterns of Promise Use
+    meta(name='description' content='A presentation about JavaScript promises and generators')
+    meta(name='author' content='Forbes Lindesay')
+    meta(name='apple-mobile-web-app-capable' conent='yes')
+    meta(name='apple-mobile-web-app-status-bar-style' content='black-translucent')
+    meta(name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no')
+    link(rel='stylesheet' href='/css/reveal.min.css')
+    //link(rel='stylesheet' href='/css/theme/default.css')
+    link(rel='stylesheet' href='/css/github.css')
+    link(rel='stylesheet' href='/font-awesome/css/index.css')
+
+    meta(name='stop' href='/css/print/paper.css')
+    meta(name='stop' href='/lib/font/league_gothic-webfont.woff')
+    meta(name='stop' href='/lib/font/league_gothic-webfont.ttf')
+    meta(name='stop' href='/lib/font/league_gothic-webfont.svg#LeagueGothicRegular')
+    meta(name='stop' href='/font-awesome/font/FontAwesome.otf')
+    meta(name='stop' href='/font-awesome/font/fontawesome-webfont.eot')
+    meta(name='stop' href='/font-awesome/font/fontawesome-webfont.svg')
+    meta(name='stop' href='/font-awesome/font/fontawesome-webfont.ttf')
+    meta(name='stop' href='/font-awesome/font/fontawesome-webfont.woff')
+
+    //- If the query includes 'print-pdf', use the PDF print sheet
+    script.
+      document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+    style.
+      .reveal .slides>section {
+        padding: 0;
+      }
+      body {
+        border-top: 12px solid #c00080;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 1.4em;
+      }
+      .reveal pre {
+        font-size: 1.5em;
+        padding: 1em;
+      }
+      .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+        margin: 0.5em 0;
+      }
+      .reveal li {
+        margin: 0.2em 0;
+      }
+      h1 {
+        text-transform: uppercase;
+      }
+      .section-break h2 {
+        width: 15em;
+        margin-left: auto;
+        margin-right: auto;
+        border-bottom: 12px solid #c00080;
+        text-transform: uppercase;
+      }
+  body
+    .reveal.linear
+      .slides
+        include slides.jade
+    script(src='/js/reveal.js')
+    script.
+      Reveal.initialize({
+        controls: false,
+        width: 1200,
+        height: 700,
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        margin: 0,
+        dependencies: [],
+        transition: 'none'
+      })

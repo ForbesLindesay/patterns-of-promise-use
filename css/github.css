@@ -1,0 +1,125 @@
+/*
+
+github.com style (c) Vasily Polovnyov <vast@whiteants.net>
+
+*/
+
+.hljs {
+  display: block; padding: 0.5em;
+  color: #333;
+  background: #f8f8f8
+}
+
+.hljs .hljs-comment,
+.hljs .hljs-template_comment,
+.diff .hljs .hljs-header,
+.hljs .hljs-javadoc {
+  color: #998;
+  font-style: italic
+}
+
+.hljs .hljs-keyword,
+.css .rule .hljs .hljs-keyword,
+.hljs .hljs-winutils,
+.javascript .hljs .hljs-title,
+.nginx .hljs .hljs-title,
+.hljs .hljs-subst,
+.hljs .hljs-request,
+.hljs .hljs-status {
+  color: #333;
+  font-weight: bold
+}
+
+.hljs .hljs-number,
+.hljs .hljs-hexcolor,
+.ruby .hljs .hljs-constant {
+  color: #099;
+}
+
+.hljs .hljs-string,
+.hljs .hljs-tag .hljs .hljs-value,
+.hljs .hljs-phpdoc,
+.tex .hljs .hljs-formula {
+  color: #d14
+}
+
+.hljs .hljs-title,
+.hljs .hljs-id,
+.coffeescript .hljs .hljs-params,
+.scss .hljs .hljs-preprocessor {
+  color: #900;
+  font-weight: bold
+}
+
+.javascript .hljs .hljs-title,
+.lisp .hljs .hljs-title,
+.clojure .hljs .hljs-title,
+.hljs .hljs-subst {
+  font-weight: normal
+}
+
+.hljs .hljs-class .hljs .hljs-title,
+.haskell .hljs .hljs-type,
+.vhdl .hljs .hljs-literal,
+.tex .hljs .hljs-command {
+  color: #458;
+  font-weight: bold
+}
+
+.hljs .hljs-tag,
+.hljs .hljs-tag .hljs .hljs-title,
+.hljs .hljs-rules .hljs .hljs-property,
+.django .hljs .hljs-tag .hljs .hljs-keyword {
+  color: #000080;
+  font-weight: normal
+}
+
+.hljs .hljs-attribute,
+.hljs .hljs-variable,
+.lisp .hljs .hljs-body {
+  color: #008080
+}
+
+.hljs .hljs-regexp {
+  color: #009926
+}
+
+.hljs .hljs-symbol,
+.ruby .hljs .hljs-symbol .hljs .hljs-string,
+.lisp .hljs .hljs-keyword,
+.tex .hljs .hljs-special,
+.hljs .hljs-prompt {
+  color: #990073
+}
+
+.hljs .hljs-built_in,
+.lisp .hljs .hljs-title,
+.clojure .hljs .hljs-built_in {
+  color: #0086b3
+}
+
+.hljs .hljs-preprocessor,
+.hljs .hljs-pragma,
+.hljs .hljs-pi,
+.hljs .hljs-doctype,
+.hljs .hljs-shebang,
+.hljs .hljs-cdata {
+  color: #999;
+  font-weight: bold
+}
+
+.hljs .hljs-deletion {
+  background: #fdd
+}
+
+.hljs .hljs-addition {
+  background: #dfd
+}
+
+.diff .hljs .hljs-change {
+  background: #0086b3
+}
+
+.hljs .hljs-chunk {
+  color: #aaa
+}
