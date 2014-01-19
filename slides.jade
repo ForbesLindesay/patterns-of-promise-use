@@ -109,7 +109,7 @@ section
     :javascript
       function throttle(limit, fn) {
         var queue = [];
-        function run(fn, self, args) {
+        function run(self, args) {
           if (limit) {
             limit--;
             var result = fn.apply(self, args);
@@ -117,7 +117,7 @@ section
             return result;
           } else {
             return new Promise(function (fulfill) {
-              queue.push({fulfill: fulfill, fn: fn, self: self, args: args})
+              queue.push({fulfill: fulfill, self: self, args: args})
             })
           }
         }
@@ -125,11 +125,11 @@ section
           limit++;
           if (queue.length) {
             var next = queue.shift();
-            next.fulfill(run(next.fn, next.self, next.args));
+            next.fulfill(run(next.self, next.args));
           }
         }
         return function () {
-          return run(fn, this, arguments);
+          return run(this, arguments);
         }
       }
 section
