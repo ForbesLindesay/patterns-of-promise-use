@@ -56,6 +56,26 @@ section.section-break
 section
   h2 Waterfall
   :javascript
+    function checkAccess(userID, resource) {
+      var user = getUser(userID);
+      var userPermissions = user.getPermissions();
+      return userPermissions.checkAccess(resource);
+    }
+section
+  h2 Waterfall
+  :javascript
+    function checkAccess(userID, resource, callback) {
+      getUser(userID, function (err, user) {
+        if (err) return callback(err);
+        user.getPermissions(function (err, userPermissions) {
+          if (err) return callback(err);
+          userPermissions.checkAccess(resource, callback);
+        });
+      });
+    }
+section
+  h2 Waterfall
+  :javascript
     function checkAccess(userID, resource, callback) {
       async.waterfall([
         function(callback){
@@ -68,14 +88,6 @@ section
           userPermissions.checkAccess(resource, callback);
         }
       ], callback);
-    }
-section
-  h2 Waterfall
-  :javascript
-    function checkAccess(userID, resource) {
-      var user = getUser(userID);
-      var userPermissions = user.getPermissions();
-      return userPermissions.checkAccess(resource);
     }
 section
   h2 Waterfall
