@@ -62,10 +62,10 @@ section
           getUser(userID, callback);
         },
         function(user, callback){
-            user.getPermissions(callback);
+          user.getPermissions(callback);
         },
         function(userPermissions, callback){
-            userPermissions.checkAccess(resource, callback);
+          userPermissions.checkAccess(resource, callback);
         }
       ], callback);
     }
