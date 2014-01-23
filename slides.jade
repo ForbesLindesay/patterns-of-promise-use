@@ -8,7 +8,29 @@ section
     span.tt tt
     |erns of Promise Use
   p Forbes Lindesay
-
+section
+  h2 What is a callback?
+  :javascript
+    function readJSON(filename, callback) {
+      fs.readFile(filename, 'utf8', function (err, res) {
+        if (err) return callback(err);
+        callback(null, JSON.parse(res));
+      });
+    }
+section
+  h2 What is a callback?
+  :javascript
+    function readJSON(filename, callback) {
+      fs.readFile(filename, 'utf8', function (err, res) {
+        if (err) return callback(err);
+        try {
+          res = JSON.parse(res);
+        } catch (ex) {
+          return callback(ex);
+        }
+        callback(null, res);
+      });
+    }
 section
   h2 What is a promise?
   ul
@@ -19,17 +41,11 @@ section
         li.fragment Fulfilled
         li.fragment Rejected
 section
-  h2 Why not just callbacks?
-  ul.icons-ul
-    +good.fragment Avoid conflating the input with the output
-    +good.fragment Composability with less chance of race conditions
-    +good.fragment Implicit error handling
-section
   h2 Creating a Promise
   :javascript
-    function readFile(filename, encoding) {
+    function readFile(filename, enc) {
       return new Promise(function (fulfill, reject) {
-        return fs.readFile(filename, encoding, function (err, res) {
+        fs.readFile(filename, enc, function (err, res) {
           if (err) reject(err);
           else fulfill(res);
         });
@@ -38,23 +54,38 @@ section
 section
   h2 Getting the value of a Promise
   :javascript
-    readFile('file.json', 'utf8').done(function (str) {
-      console.log(str);
-    }, function (err) {
-      console.log('Error reading file:');
-      throw err;
-    });
+    function readJSON(filename) {
+      return new Promise(function (fulfill, reject) {
+        readFile(filename, 'utf8').done(function (res) {
+          try {
+            fulfill(JSON.parse(res));
+          } catch (ex) {
+            reject(ex);
+          }
+        }, reject);
+      });
+    }
 section
   h2 Chaining asynchronous operations
   :javascript
-    var promiseForObj = readFile('file.json', 'utf8').then(JSON.parse);
+    function readJSON(filename) {
+      return readFile(filename, 'utf8').then(function (res) {
+        return JSON.parse(res);
+      });
+    }
     
-    promiseForObj.done(function (obj) {
+    readJson('file.json').done(function (obj) {
       console.log(obj);
     }, function (err) {
       console.log('Error reading file:');
       throw err;
     });
+section
+  h2 What did we gain?
+  ul.icons-ul
+    +good.fragment Avoided conflating the input with the output
+    +good.fragment Composability with less chance of race conditions
+    +good.fragment Implicit error handling
 
 +sectionbreak
   h2 Async.js - Waterfall
@@ -83,13 +114,13 @@ section
   :javascript
     function checkAccess(userID, resource, callback) {
       async.waterfall([
-        function(callback){
+        function(callback) {
           getUser(userID, callback);
         },
-        function(user, callback){
+        function(user, callback) {
           user.getPermissions(callback);
         },
-        function(userPermissions, callback){
+        function(userPermissions, callback) {
           userPermissions.checkAccess(resource, callback);
         }
       ], callback);
@@ -103,63 +134,6 @@ section
       }).then(function (userPermissions) {
         return userPermissions.checkAccess(resource);
       });
-    }
-+sectionbreak
-  h2
-    |Thro
-    span.tt tt
-    |ling
-section
-  h2 One at a Time
-  :javascript
-    function oneAtATime(fn) {
-      var ready = Promise.from(null);
-      return function () {
-        var args = arguments;
-        var result = ready.then(function () {
-          return fn.apply(null, args);
-        });
-        ready = result.then(null, function () {});
-        return result;
-      };
-    }
-section
-  h2 Limit
-  div(style="font-size: 0.6em;")
-    :javascript
-      function throttle(limit, fn) {
-        var queue = [];
-        function run(self, args) {
-          if (limit) {
-            limit--;
-            var result = fn.apply(self, args);
-            result.done(release, release);
-            return result;
-          } else {
-            return new Promise(function (fulfill) {
-              queue.push({fulfill: fulfill, self: self, args: args})
-            })
-          }
-        }
-        function release() {
-          limit++;
-          if (queue.length) {
-            var next = queue.shift();
-            next.fulfill(run(next.self, next.args));
-          }
-        }
-        return function () {
-          return run(this, arguments);
-        }
-      }
-section
-  h2 Throat
-  :javascript
-    var throttle = require('throat');
-    var throttled = throttle(4, fn);
-    //now throttled calls fn only 4 times in parallel
-    for (var i = 0; i < 1000; i++) {
-      fn(i);
     }
 
 +sectionbreak
@@ -231,24 +205,92 @@ section
     var numbers = [1, 2, 3, 4];
     var doubled = Promise.all(numbers.map(slowDouble));
     // doubled => Promise([2, 4, 6, 8])
+
++sectionbreak
+  h2
+    |Thro
+    span.tt tt
+    |ling
 section
-  h2 mapSerial / mapLimit
+  h2 mapSerial
   :javascript
     var numbers = [1, 2, 3, 4];
-    async.mapSerial(numbers, function slowDouble(n, callback) {
+    async.mapSerial(numbers, function (n, callback) {
       setTimeout(function () {
         callback(null, n * 2);
       }, 10000);
     }, function (err, doubled) {
       // doubled => [2, 4, 6, 8]
     });
-    async.mapLimit(numbers, 2, function slowDouble(n, callback) {
+section
+  h2 One at a Time
+  :javascript
+    function oneAtATime(fn) {
+      var ready = Promise.from(null);
+      return function () {
+        var args = arguments;
+        var result = ready.then(function () {
+          return fn.apply(null, args);
+        });
+        ready = result.then(null, function () {});
+        return result;
+      };
+    }
+section
+  h2 mapSerial
+  :javascript
+    var numbers = [1, 2, 3, 4];
+    var doubled = Promise.all(numbers.map(oneAtATime(slowDouble)));
+
+section
+  h2 mapLimit
+  :javascript
+    var numbers = [1, 2, 3, 4];
+    async.mapLimit(numbers, 2, function (n, callback) {
       setTimeout(function () {
         callback(null, n * 2);
       }, 10000);
     }, function (err, doubled) {
       // doubled => [2, 4, 6, 8]
     });
+section
+  h2 Limit
+  div(style="font-size: 0.6em;")
+    :javascript
+      function throttle(limit, fn) {
+        var queue = [];
+        function run(self, args) {
+          if (limit) {
+            limit--;
+            var result = fn.apply(self, args);
+            result.done(release, release);
+            return result;
+          } else {
+            return new Promise(function (fulfill) {
+              queue.push({fulfill: fulfill, self: self, args: args})
+            })
+          }
+        }
+        function release() {
+          limit++;
+          if (queue.length) {
+            var next = queue.shift();
+            next.fulfill(run(next.self, next.args));
+          }
+        }
+        return function () {
+          return run(this, arguments);
+        }
+      }
+section
+  h2 Throat
+  :javascript
+    var throttle = require('throat');
+    var throttled = throttle(4, fn);
+    //now throttled calls fn only 4 times in parallel
+    for (var i = 0; i < 1000; i++) {
+      fn(i);
+    }
 section
   h2 mapSerial / mapLimit
   :javascript
@@ -329,9 +371,9 @@ section
   h2 Promise.race
   :javascript
     Promise.race = function (array) {
-      return new Promise(function (resolve, reject) {
+      return new Promise(function (fulfill, reject) {
         array.forEach(function (promise) {
-          promise.done(resolve, reject);
+          promise.done(fulfill, reject);
         });
       });
     };
@@ -339,14 +381,14 @@ section
   h2 Some
   :javascript
     function some(array, fn) {
-      return new Promise(function (resolve, reject) {
+      return new Promise(function (, reject) {
         var all = array.map(fn).map(function (promise) {
           return promise.then(function (matches) {
-            if (matches) resolve(true);
+            if (matches) fulfill(true);
           });
         });
         Promise.all(all).done(function () {
-          resolve(false);
+          fulfill(false);
         }, reject);
       });
     }
