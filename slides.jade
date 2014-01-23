@@ -1,9 +1,14 @@
+mixin sectionbreak
+  section.section-break(data-state="section-break")
+    block
+
 section
-  h1 Patterns of Promise Use
+  h1
+    |Pa
+    span.tt tt
+    |erns of Promise Use
   p Forbes Lindesay
 
-section.section-break
-  h2 Introduction
 section
   h2 What is a promise?
   ul
@@ -51,7 +56,7 @@ section
       throw err;
     });
 
-section.section-break
++sectionbreak
   h2 Async.js - Waterfall
 section
   h2 Waterfall
@@ -99,8 +104,11 @@ section
         return userPermissions.checkAccess(resource);
       });
     }
-section.section-break
-  h2 Throttling
++sectionbreak
+  h2
+    |Thro
+    span.tt tt
+    |ling
 section
   h2 One at a Time
   :javascript
@@ -154,7 +162,7 @@ section
       fn(i);
     }
 
-section.section-break
++sectionbreak
   h2 Async.js - Map
 section
   h2 Array.prototype.map
@@ -248,19 +256,116 @@ section
     var numbers = [1, 2, 3, 4];
     var doubledSer = Promise.all(numbers.map(throat(1, slowDouble)));
     var doubledLim = Promise.all(numbers.map(throat(2, slowDouble)));
+
++sectionbreak
+  h2 Async.js - Filter
+section
+  h2 Array.prototype.filter
+  :javascript
+    var files = ['foo.txt', 'bar.txt'];
+    var existing = files.filter(function (n) {
+      return fs.existsSync(n);
+    });
+    // existing => ['foo.txt']
+section
+  h2 Async.filter
+  :javascript
+    var files = ['foo.txt', 'bar.txt'];
+    async.filter(files, fs.exists, function (existing) {
+      // existing => ['foo.txt']
+    });
+section
+  h2 Async.filter
+  :javascript
+    var files = ['foo.txt', 'bar.txt'];
+    async.filter(files, function (filename, callback) {
+      fs.exists(filename, function (exists) {
+        callback(exists);
+      });
+    }, function (existing) {
+      // existing => ['foo.txt']
+    });
+
+section
+  h2 Async.filter
+  :javascript
+    var entries = ['foo.txt', 'bar'];
+    async.filter(entries, function (name, callback) {
+      fs.stat(name, function (err, stat) {
+        if (err) throw err; // WTF!
+        callback(stat.isDirectory());
+      });
+    }, function (directories) {
+      // directories => ['bar']
+    });
+section
+  h2 Promise Filter
+  :javascript
+    function filter(array, fn) {
+      return Promise.all(array.map(fn)).then(function (filtered) {
+        return array.filter(function (item, index) {
+          return filtered[index];
+        });
+      });
+    }
+section
+  h2 Promise Filter
+  :javascript
+    var files = ['foo.txt', 'bar.txt'];
+    var existing = filter(files, existsPromise);
+    // existing => Promise(['foo.txt'])
+
+    var entries = ['foo.txt', 'bar'];
+    var directories = filter(files, function (name) {
+      return statPromise(name).then(function (stat) {
+        return stat.isDirectory();
+      });
+    });
+    // directories => Promise(['bar'])
+
++sectionbreak
+  h2 Races
+section
+  h2 Promise.race
+  :javascript
+    Promise.race = function (array) {
+      return new Promise(function (resolve, reject) {
+        array.forEach(function (promise) {
+          promise.done(resolve, reject);
+        });
+      });
+    };
+section
+  h2 Some
+  :javascript
+    function some(array, fn) {
+      return new Promise(function (resolve, reject) {
+        var all = array.map(fn).map(function (promise) {
+          return promise.then(function (matches) {
+            if (matches) resolve(true);
+          });
+        });
+        Promise.all(all).done(function () {
+          resolve(false);
+        }, reject);
+      });
+    }
++sectionbreak
+  h2 Errors
++sectionbreak
+  h2 Consistent
++sectionbreak
+  h2 Composable
 section
   h2 Forbes Lindesay
-  h4 Social Networks
-  ul
-    li Twitter: @ForbesLindesay
-    li GitHub: @ForbesLindesay
-    li Blog: www.forbeslindesay.co.uk
-  h4 Open Source
-  ul
-    li Jade
-    li Browserify Middleware
-    li esdiscuss.org
-    li regexplained.co.uk
-  h4 Work
-  ul
-    li Red Gate
+  h3 Social Networks
+  p Twitter: @ForbesLindesay
+  p GitHub: @ForbesLindesay
+  p Blog: www.forbeslindesay.co.uk
+  h3 Open Source
+  p Jade
+  p Browserify Middleware
+  p esdiscuss.org
+  p regexplained.co.uk
+  h3 Work
+  p Red Gate

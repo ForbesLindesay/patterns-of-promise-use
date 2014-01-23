@@ -59,12 +59,27 @@ html
       h1 {
         text-transform: uppercase;
       }
+      span.tt {
+        letter-spacing: 0.05em;
+      }
       .section-break h2 {
-        width: 15em;
-        margin-left: auto;
-        margin-right: auto;
-        border-bottom: 12px solid #c00080;
         text-transform: uppercase;
+        color: white !important;
+        font-size: 4em;
+      }
+      .section-break .state-background {
+        background: #c00080 !important;
+      }
+      
+      .section-break body {
+        border-top: 12px solid white;
+      }
+      .reveal .state-background {
+        -webkit-transition: background 400ms ease;
+        -moz-transition: background 400ms ease;
+        -ms-transition: background 400ms ease;
+        -o-transition: background 400ms ease;
+        transition: background 400ms ease;
       }
   body
     .reveal.linear
