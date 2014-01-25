@@ -74,7 +74,7 @@ section
       });
     }
     
-    readJson('file.json').done(function (obj) {
+    readJSON('file.json').done(function (obj) {
       console.log(obj);
     }, function (err) {
       console.log('Error reading file:');
@@ -114,13 +114,13 @@ section
   :javascript
     function checkAccess(userID, resource, callback) {
       async.waterfall([
-        function(callback) {
+        function (callback) {
           getUser(userID, callback);
         },
-        function(user, callback) {
+        function (user, callback) {
           user.getPermissions(callback);
         },
-        function(userPermissions, callback) {
+        function (userPermissions, callback) {
           userPermissions.checkAccess(resource, callback);
         }
       ], callback);
@@ -289,7 +289,7 @@ section
     var throttled = throttle(4, fn);
     //now throttled calls fn only 4 times in parallel
     for (var i = 0; i < 1000; i++) {
-      fn(i);
+      throttled(i);
     }
 section
   h2 mapSerial / mapLimit
@@ -392,6 +392,48 @@ section
         }, reject);
       });
     }
++sectionbreak
+  h2 Real World Use
+section
+  h2 Express
+  :javascript
+    var express = require('express');
+    var app = express();
+    
+    app.use(function (req, res, next) {
+      database.getUser(req.userId).then(function (user) {
+        req.user = user;
+      }).nodeify(next);
+    });
+    
+    app.get('/:item', function (req, res, next) {
+      database.getItem(req.params.item).then(function (item) {
+        res.render('item-view', {item: item});
+      }).done(null, next);
+    });
+    
+    app.listen(3000);
+section
+  h2 Mocha
+  :javascript
+    describe('my feature', function () {
+      it('rocks', function (done) {
+        doAwesomeAsync().then(function (res) {
+          assert(res, 'res should be awesome');
+        }).nodeify(done);
+      });
+    });
+section
+  h2 Mocha As Promised
+  :javascript
+    require('mocha-as-promised');
+    describe('my feature', function () {
+      it('rocks', function () {
+        return doAwesomeAsync().then(function (res) {
+          assert(res, 'res should be awesome');
+        });
+      });
+    });
 +sectionbreak
   h2 Errors
 +sectionbreak
