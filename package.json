@@ -5,9 +5,9 @@
   "description": "A presentation about JavaScript promises and generators",
   "dependencies": {
     "transform": "~1.1.0",
-    "jade": "~0.35.0",
-    "express": "~3.3.6",
-    "highlight.js": "~8.0.0"
+    "jade": "~1.11.0",
+    "express": "~4.14.1",
+    "highlight.js": "~9.9.0"
   },
   "devDependencies": {
     "mocha": "*",
