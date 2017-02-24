@@ -1,5 +1,7 @@
 # promises-and-generators
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/ForbesLindesay/patterns-of-promise-use.svg)](https://greenkeeper.io/)
+
 A presentation about JavaScript promises and generators
 
 [![Build Status](https://img.shields.io/travis/ForbesLindesay/promises-and-generators/master.svg)](https://travis-ci.org/ForbesLindesay/promises-and-generators)
